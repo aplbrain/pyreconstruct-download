@@ -1,20 +1,18 @@
 # pyreconstruct-download
 Tiny Flask app for downloading a subvolume for annotation in PyReconstruct, deployed with Zappa
 
-Dependency: [uv](https://github.com/astral-sh/uv) 
+Dependency: [conda](https://docs.anaconda.com/miniconda/) 
 
 To install locally:
 ```
-curl -LsSf https://astral.sh/uv/install.sh | sh
-source $HOME/.cargo/env
 git clone https://github.com/aplbrain/pyreconstruct-download.git
 cd pyreconstruct-download
-uv venv
+conda env create -f environment.yaml
 ```
 
 To run locally:
 ```
-source .venv/bin/activate
-uv run flask run
+conda activate pyreconstruct-download
+flask run --debug
 ```
 

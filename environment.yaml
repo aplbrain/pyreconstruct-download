@@ -1,0 +1,9 @@
+name: pyreconstruct-download
+dependencies:
+  - flask=3.0.3
+  - python=3.10.0
+  - pip
+  - zarr=2.13.3
+  - pip:
+      - cloud-volume==11.0.2
+      - intern==1.4.1
