@@ -1,5 +1,5 @@
 from flask import Flask, render_template, send_file, request
-from cloudvolume import CloudVolume
+from intern.convenience import array
 import numpy as np
 import zarr
 import math
@@ -35,32 +35,38 @@ def download():
     z_extent = z_end - z_start
 
     # Set S3 paths to data
-    em = CloudVolume(request.args.get('image-path'), mip=mip, parallel=True, progress=True)
-    # TODO: need to add a type check on image type here
-    # TODO: need to sanitize input
+    em = array(request.args.get('image-path'))
+    # if em.layer_type != 'image':
+    #     raise ValueError("The given S3 image path is invalid or contains data other than images.")
+    # TODO: need to implement as three dropdowns
+    # TODO: need to make metadata api call to confirm image layer
 
-    # TODO: comment out segmentation for v1
     seg = False # pull only EM; set to True to pull segmentation too
-    # seg_vol = CloudVolume('s3://bossdb-open-data/iarpa_microns/minnie/minnie65/seg', mip=mip, parallel=True, progress=True)
-    # TODO: need to add a type check on segmentation type here
+    if request.args.get('seg-path'):
+        seg = True
+        seg_vol = array(request.args.get('seg-path'))
+        # if seg_vol.layer_type != 'segmentation':
+        #     raise ValueError("The given S3 segmentation path is invalid or contains data other than segmentation.")
+        # TODO: need to make metadata api call to confirm seg layer
 
     # Set output dir name
     output_dirname = request.args.get('downloaded-filename')
-    # TODO: need to sanitize input
 
     ##########
     ## CODE ##
     ##########
+    ZARR_CHUNK_SIZE = [32, 256, 256]
+
     with tempfile.TemporaryDirectory() as tmpdirname:
 
         # Calculate shape from extent and resolution
-        em_res = list(em.resolution)[::-1]
+        em_res = list(em.voxel_size)[::-1]
         if seg:
-            seg_res = list(seg_vol.resolution)[::-1]
+            seg_res = list(seg_vol.voxel_size)[::-1]
 
         store = zarr.DirectoryStore(tmpdirname)
         zarr_group = zarr.group(store, overwrite=True)
-        chunk_size = np.array(em.chunk_size)[::-1]
+        chunk_size = ZARR_CHUNK_SIZE
         if chunk_size[0] > z_extent: chunk_size[0] = z_extent
         if chunk_size[1] > y_extent: chunk_size[1] = y_extent
         if chunk_size[2] > x_extent: chunk_size[2] = x_extent
@@ -75,7 +81,7 @@ def download():
             seg_array = zarr_group.create_dataset(
                 'seg', 
                 shape=[z_extent, y_extent, x_extent], 
-                chunks=np.array(seg_vol.chunk_size[::-1]), 
+                chunks=chunk_size, 
                 dtype=seg_vol.dtype,
             )
 
@@ -97,13 +103,11 @@ def download():
         for x_chunk in x_chunks:
             for y_chunk in y_chunks:
                 for z_chunk in z_chunks:
-                    em_cutout = em[x_chunk[0]:x_chunk[1], y_chunk[0]:y_chunk[1], z_chunk[0]:z_chunk[1]]
-                    em_cutout = np.squeeze(em_cutout).transpose()
+                    em_cutout = em[z_chunk[0]:z_chunk[1], y_chunk[0]:y_chunk[1], x_chunk[0]:x_chunk[1]]
                     em_array[z_chunk[0]-z_start:z_chunk[1]-z_start, y_chunk[0]-y_start:y_chunk[1]-y_start, x_chunk[0]-x_start:x_chunk[1]-x_start] = em_cutout
 
                     if seg:
-                        seg_cutout = seg_vol[x_chunk[0]:x_chunk[1], y_chunk[0]:y_chunk[1], z_chunk[0]:z_chunk[1]]
-                        seg_cutout = np.squeeze(seg_cutout).transpose()
+                        seg_cutout = seg_vol[z_chunk[0]:z_chunk[1], y_chunk[0]:y_chunk[1], x_chunk[0]:x_chunk[1]]
                         seg_array[z_chunk[0]-z_start:z_chunk[1]-z_start, y_chunk[0]-y_start:y_chunk[1]-y_start, x_chunk[0]-x_start:x_chunk[1]-x_start] = seg_cutout
 
         em_array.attrs["resolution"] = em_res

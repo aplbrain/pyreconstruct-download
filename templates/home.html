@@ -9,8 +9,8 @@
 
 <body>
     <p align="center">
-        <img src='https://user-images.githubusercontent.com/693511/201149780-b9131c22-3c80-4e15-9ec2-919652ae189d.png'
-            width=250> <img src='static/pyreconstruct.png' width=250>
+        <img src='https://user-images.githubusercontent.com/693511/201149780-b9131c22-3c80-4e15-9ec2-919652ae189d.png'width=250> 
+        <img src='static/pyreconstruct.png' width=250>
     </p>
     <h1 align="center">
         BossDB Labs: PyReconstruct
@@ -21,20 +21,33 @@
         cell features. It is actively maintained by the Kristen Harris lab at the 
         University of Texas at Austin. To annotate BossDB-hosted image volumes 
         using PyReconstruct, download a subvolume using this webpage, then import 
-        it into PyReconstruct using the guide below.
+        it into PyReconstruct using the <a href="#import">guide below</a>.
+    </p>
+
+    <p>Questions? Reach us at <a href="mailto:info@bossdb.org">info@bossdb.org</a>.</p>
+
+    <h2>Download a Subvolume</h2>
+    <p>
+        First, construct the BossDB path(s) where your data of interest is stored.
+        To construct the paths, browse <a href="https://metadata.bossdb.org">https://metadata.bossdb.org</a>
+        to find the data of interest. Copy into the box the collection,
+        experiment, and channel formatted as <code>bossdb://&lt;collection&gt;/&lt;experiment&gt;/&lt;channel&gt;</code>.
+    </p>
+    <p>
+        An example of a BossDB path is <code>bossdb://microns/minnie65_8x8x40/em</code>.
+        Its metadata page is found <a href="https://metadata.bossdb.org/Channel/c7587b3ff17a681d80e5402a">here</a>
+        and its collection, experiment, and channel are the title of the webpage.
     </p>
 
     <form action="/download">
 
-        <label>S3 Path to Image Data:</label>
-        <input type="text" name="image-path" id="image-path" class="wide-input">
-        <p>
-            The prefix of this path should be <code>s3://bossdb-open-data</code>. 
-            To find the correct S3 path, visit the project page on 
-            <a href="https://bossdb.org/projects">https://bossdb.org/projects</a>,
-            view your project in Neuroglancer, copy the source URI for the image
-            layer, and remove the <code>precomputed://</code> prefix.
-        </p>
+        <label>BossDB Path for Image Data</label>
+        <div class="flex">
+            <input type="text" name="image-path" id="image-path" class="wide-input">
+        </div>
+
+        <label>BossDB Path Segmentation Data (Optional)</label>
+        <input type="text" name="seg-path" id="seg-path" class="wide-input">
 
         <label>X Coordinates</label>
         <div class="flex">
@@ -96,8 +109,28 @@
         <label>Downloaded Filename</label>
         <input type="text" name="downloaded-filename" id="downloaded-filename" class="wide-input">
 
-        <button type="submit">Submit</button>
+        <button type="submit">Download</button>
     </form>
+
+    <h2 id="import">Import into PyReconstruct</h2>
+
+    <p>
+        First, install and start PyReconstruct. The instructions are found in the 
+        <a href="https://github.com/SynapseWeb/PyReconstruct">official README</a>.
+    </p>
+
+    <p>
+        Next, unzip the file you downloaded. Import it into PyReconstruct using
+        the <code>File > New > From neuroglancer zarr...</code> menu option. Follow the menus
+        through until the import has completed.
+    </p>
+    <img src='static/import.png'>
+
+    <p>
+        After import, the view may still appear black. If so, use the <code>View >
+        Set view to image</code> menu option.
+    </p>
+    <img src='static/view.png'>
 
 </body>
 
