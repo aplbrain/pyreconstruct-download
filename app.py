@@ -5,6 +5,7 @@ import zarr
 import math
 import tempfile
 import shutil
+import requests
 
 app = Flask(__name__)
 
@@ -35,19 +36,31 @@ def download():
     z_extent = z_end - z_start
 
     # Set S3 paths to data
-    em = array(request.args.get('image-path'))
-    # if em.layer_type != 'image':
-    #     raise ValueError("The given S3 image path is invalid or contains data other than images.")
-    # TODO: need to implement as three dropdowns
-    # TODO: need to make metadata api call to confirm image layer
+    image_path = request.args.get('image-path')
+    em = ""
+    channels = requests.get("https://api.metadata.bossdb.org/api/v2/channels").json()["data"]
+    for channel in channels:
+        if channel["attributes"]["ID"] == image_path:
+            if channel["attributes"]["ChannelType"] == "Image":
+                em = array(image_path)
+                break
+            else:
+                raise ValueError("This channel is not an image channel.")
+    if not em:
+        raise ValueError("This channel does not exist.")
 
-    seg = False # pull only EM; set to True to pull segmentation too
+    # TODO: need to implement as three dropdowns
+
+    seg = False
     if request.args.get('seg-path'):
-        seg = True
-        seg_vol = array(request.args.get('seg-path'))
-        # if seg_vol.layer_type != 'segmentation':
-        #     raise ValueError("The given S3 segmentation path is invalid or contains data other than segmentation.")
-        # TODO: need to make metadata api call to confirm seg layer
+        seg_path = request.args.get('seg-path')
+        for channel in channels:
+            if channel["attributes"]["ID"] == seg_path:
+                seg = True
+                seg_vol = array(seg_path)
+                break
+        if not seg:
+            raise ValueError("This channel does not exist.")
 
     # Set output dir name
     output_dirname = request.args.get('downloaded-filename')
