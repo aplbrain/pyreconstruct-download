@@ -1,0 +1,9 @@
+{
+    "labs": {
+        "app_function": "app.app",
+        "project_name": "bossdb-pyreconstruct-download",
+        "runtime": "python3.10",
+        "s3_bucket": "zappa-bossdb-labs-pyreconstruct-download",
+        "slim_handler": true
+    }
+}
