@@ -1,0 +1,16 @@
+.wide-input {
+    width: 100%;
+}
+
+.flex {
+    display: flex;
+}
+
+.padding-x {
+    padding: 0 1em;
+}
+
+input[type=number] {
+    height: 39px;
+    padding: 0 1em;
+}

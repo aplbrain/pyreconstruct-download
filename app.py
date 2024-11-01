@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_file
+from flask import Flask, render_template, send_file, request
 from cloudvolume import CloudVolume
 import numpy as np
 import zarr
@@ -15,13 +15,18 @@ def home():
 @app.route("/download")
 def download():
 
-    # Define your subvolume bounds. End slices are excluded
-    x_end = 120692
-    x_start = x_end - 2000
-    y_end = 103648
-    y_start = y_end - 2000
-    z_end = 21365
-    z_start = z_end - 2
+    # TODO: add try/accept here that reloads html page with error message
+
+    # Define subvolume bounds. End slices are excluded
+    x_start = int(request.args.get('x-start'))
+    x_end = int(request.args.get('x-end'))
+    y_start = int(request.args.get('y-start'))
+    y_end = int(request.args.get('y-end'))
+    z_start = int(request.args.get('z-start'))
+    z_end = int(request.args.get('z-end'))
+    # TODO: add metadata call here to verify bounds
+
+    # TODO: add this to the web form
     mip = 0
 
     # Calculate extents for readability later
@@ -30,17 +35,18 @@ def download():
     z_extent = z_end - z_start
 
     # Set S3 paths to data
-    em = CloudVolume('s3://bossdb-open-data/iarpa_microns/minnie/minnie65/em', mip=mip, parallel=True, progress=True)
+    em = CloudVolume(request.args.get('image-path'), mip=mip, parallel=True, progress=True)
+    # TODO: need to add a type check on image type here
+    # TODO: need to sanitize input
+
+    # TODO: comment out segmentation for v1
     seg = False # pull only EM; set to True to pull segmentation too
-    seg_vol = CloudVolume('s3://bossdb-open-data/iarpa_microns/minnie/minnie65/seg', mip=mip, parallel=True, progress=True)
+    # seg_vol = CloudVolume('s3://bossdb-open-data/iarpa_microns/minnie/minnie65/seg', mip=mip, parallel=True, progress=True)
+    # TODO: need to add a type check on segmentation type here
 
     # Set output dir name
-    output_dirname = "minnie65_cutout_test_flask"
-
-    # A segmentation volume pulled this way takes a really long time to convert to contours.
-    # Like, my laptop CPU took 30+ minutes to finish a 1.5 gb volume and nearly overheated.
-    # I think PyReconstruct is just not designed for dense annotations.
-    # Could consider bringing this up to Michael and Julian.
+    output_dirname = request.args.get('downloaded-filename')
+    # TODO: need to sanitize input
 
     ##########
     ## CODE ##
