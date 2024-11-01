@@ -1,4 +1,4 @@
 flask==3.0.3
 zarr==2.13.3
-cloud-volume==11.0.2
 zappa==0.59.0
+intern==1.4.1

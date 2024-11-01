@@ -4,6 +4,8 @@
         "project_name": "bossdb-pyreconstruct-download",
         "runtime": "python3.10",
         "s3_bucket": "zappa-bossdb-labs-pyreconstruct-download",
-        "slim_handler": true
+        "slim_handler": true,
+        "certificate_arn": "arn:aws:acm:us-east-1:407510763690:certificate/0c345d5b-044a-4917-90e5-b66d6a00fff7",
+        "domain": "pyreconstruct-download.labs.bossdb.org"
     }
 }
