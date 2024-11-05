@@ -1,11 +1,14 @@
-from flask import Flask, render_template, send_file, request
+from flask import Flask, render_template, request, make_response
 from intern.convenience import array
-import numpy as np
 import zarr
 import math
 import tempfile
 import shutil
 import requests
+import boto3
+from botocore.exceptions import ClientError
+import time
+import logging
 
 app = Flask(__name__)
 
@@ -129,9 +132,13 @@ def download():
 
         shutil.make_archive(tmpdirname, 'zip', tmpdirname)
 
-        return send_file(
-            f"{tmpdirname}.zip",
-            mimetype='application/zip',
-            as_attachment=True,
-            download_name=f'{output_dirname}.zarr.zip'
-        )
+        # Upload the file
+        now = int(time.time())
+        s3_client = boto3.client('s3')
+        try:
+            s3_client.upload_file(f"{tmpdirname}.zip", "pyreconstruct-download", f"{output_dirname}_{now}.zip")
+            url = f"https://pyreconstruct-download.s3.amazonaws.com/{output_dirname}_{now}.zip"
+            return f'<a href={url}>{url}</a>'
+        except ClientError as e:
+            logging.error(e)
+            return make_response("Error uploading to S3", 500)
