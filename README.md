@@ -16,3 +16,7 @@ source venv/bin/activate
 flask run --debug
 ```
 
+To deploy changes:
+```
+zappa update
+```
