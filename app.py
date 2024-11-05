@@ -137,7 +137,10 @@ def download():
             output_filename = f"{collection}_{experiment}_{now}.zip"
             s3_client.upload_file(f"{tmpdirname}.zip", "pyreconstruct-download", output_filename)
             url = f"https://pyreconstruct-download.s3.amazonaws.com/{output_filename}"
-            return f'<a href={url}>{url}</a>'
+            return f'''
+                <p>This link will be valid for 24 hours.</p>
+                <a href={url}>{url}</a>
+            '''
         except ClientError as e:
             logging.error(e)
             return make_response("Error uploading to S3", 500)
