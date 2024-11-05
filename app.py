@@ -65,9 +65,6 @@ def download():
         if not seg:
             raise ValueError("This channel does not exist.")
 
-    # Set output dir name
-    output_dirname = request.args.get('downloaded-filename')
-
     ##########
     ## CODE ##
     ##########
@@ -133,11 +130,13 @@ def download():
         shutil.make_archive(tmpdirname, 'zip', tmpdirname)
 
         # Upload the file
-        now = int(time.time())
         s3_client = boto3.client('s3')
         try:
-            s3_client.upload_file(f"{tmpdirname}.zip", "pyreconstruct-download", f"{output_dirname}_{now}.zip")
-            url = f"https://pyreconstruct-download.s3.amazonaws.com/{output_dirname}_{now}.zip"
+            now = int(time.time())
+            collection, experiment, channel = image_path.split("/")[2:]
+            output_filename = f"{collection}_{experiment}_{now}.zip"
+            s3_client.upload_file(f"{tmpdirname}.zip", "pyreconstruct-download", output_filename)
+            url = f"https://pyreconstruct-download.s3.amazonaws.com/{output_filename}"
             return f'<a href={url}>{url}</a>'
         except ClientError as e:
             logging.error(e)
