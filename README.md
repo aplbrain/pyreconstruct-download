@@ -10,6 +10,8 @@ To install locally:
 git clone https://github.com/aplbrain/pyreconstruct-download.git
 cd pyreconstruct-download
 python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 To run locally:
